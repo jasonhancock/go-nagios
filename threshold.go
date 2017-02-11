@@ -16,12 +16,18 @@ type Threshold struct {
 	minInfinity bool
 	maxInfinity bool
 	insideRange bool
+	source      string
 }
 
 func NewThreshold(str string) (*Threshold, error) {
 	t := &Threshold{
-		min: 0,
-		max: 0,
+		min:    0,
+		max:    0,
+		source: str,
+	}
+
+	if str == "" {
+		return t, nil
 	}
 
 	sansPrefix := strings.TrimPrefix(str, "@")
@@ -32,7 +38,7 @@ func NewThreshold(str string) (*Threshold, error) {
 	pieces := strings.Split(sansPrefix, ":")
 
 	if len(pieces) == 0 || len(pieces) > 2 {
-		return nil, errors.Wrap(ErrorInvalidThresholdFormat, "too many pieces")
+		return nil, errors.Wrap(ErrorInvalidThresholdFormat, "too many or few pieces")
 	}
 
 	if len(pieces) == 1 {
@@ -73,8 +79,17 @@ func NewThreshold(str string) (*Threshold, error) {
 	return t, nil
 }
 
+func (t Threshold) String() string {
+	return t.source
+}
+
 // Evaluate returns true if the value matches the threshold, false otherwise
 func (t Threshold) Evaluate(value float64) bool {
+	// Always return true if the source was empty
+	if t.source == "" {
+		return true
+	}
+
 	var inRange bool
 
 	if t.minInfinity {
@@ -93,4 +108,17 @@ func (t Threshold) Evaluate(value float64) bool {
 		return inRange
 	}
 	return !inRange
+}
+
+// CheckThreshold returns a Nagios exit status code based on whether or not the value meets the warn and crit thresholds
+func CheckThreshold(value float64, warn *Threshold, crit *Threshold) int {
+	if crit.Evaluate(value) {
+		return CRITICAL
+	}
+
+	if warn.Evaluate(value) {
+		return WARNING
+	}
+
+	return OK
 }
