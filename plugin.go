@@ -31,7 +31,7 @@ func NewPlugin(name string, flag *flag.FlagSet) *Plugin {
 
 func (p Plugin) Exit(code int, message string, v ...interface{}) {
 	// TODO: build performance data, format the message, ec.
-	fmt.Printf(message, v)
+	fmt.Printf(message, v...)
 	os.Exit(code)
 }
 
