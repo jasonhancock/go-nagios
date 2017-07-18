@@ -45,10 +45,10 @@ func (p Plugin) Fatalf(format string, v ...interface{}) {
 	os.Exit(UNKNOWN)
 }
 
-func (p Plugin) Verbose(message interface{}) {
+func (p Plugin) Verbose(msgs ...interface{}) {
 	verbose, _ := p.OptBool("verbose")
 	if verbose {
-		log.Println(message)
+		log.Println(msgs...)
 	}
 }
 
