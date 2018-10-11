@@ -1,8 +1,30 @@
 package nagios
 
 import (
+	"time"
+
 	"github.com/pkg/errors"
 )
+
+func (p *Plugin) DurationFlag(name string, value time.Duration, usage string) error {
+	if p.flagSet.Parsed() {
+		return errors.New("flag must be unparsed")
+	}
+
+	p.flagVals[name] = &value
+	p.flagSet.DurationVar(p.flagVals[name].(*time.Duration), name, value, usage)
+
+	return nil
+}
+
+func (p Plugin) OptDuration(name string) (time.Duration, error) {
+	v, ok := p.flagVals[name]
+	if !ok {
+		return 0, errors.Errorf("option not found: %s", name)
+	}
+
+	return *v.(*time.Duration), nil
+}
 
 func (p *Plugin) BoolFlag(name string, value bool, usage string) error {
 	if p.flagSet.Parsed() {
