@@ -1,11 +1,12 @@
 package nagios
 
 import (
+	"errors"
+	"fmt"
 	"time"
-
-	"github.com/pkg/errors"
 )
 
+// DurationFlag sets up a flag that handles a time.Duration value.
 func (p *Plugin) DurationFlag(name string, value time.Duration, usage string) error {
 	if p.flagSet.Parsed() {
 		return errors.New("flag must be unparsed")
@@ -17,15 +18,18 @@ func (p *Plugin) DurationFlag(name string, value time.Duration, usage string) er
 	return nil
 }
 
+// OptDuration returns the value of a given flag. A flag with that name must have
+// been defined by calling DuraationFlag.
 func (p Plugin) OptDuration(name string) (time.Duration, error) {
 	v, ok := p.flagVals[name]
 	if !ok {
-		return 0, errors.Errorf("option not found: %s", name)
+		return 0, fmt.Errorf("option not found: %s", name)
 	}
 
 	return *v.(*time.Duration), nil
 }
 
+// BoolFlag sets up a flag that handles a boolean value.
 func (p *Plugin) BoolFlag(name string, value bool, usage string) error {
 	if p.flagSet.Parsed() {
 		return errors.New("flag must be unparsed")
@@ -37,16 +41,19 @@ func (p *Plugin) BoolFlag(name string, value bool, usage string) error {
 	return nil
 }
 
+// OptBool returns the value of a given flag. A flag with that name must have
+// been defined by calling BoolFlag.
 func (p Plugin) OptBool(name string) (bool, error) {
 
 	v, ok := p.flagVals[name]
 	if !ok {
-		return false, errors.Errorf("option not found: %s", name)
+		return false, fmt.Errorf("option not found: %s", name)
 	}
 
 	return *v.(*bool), nil
 }
 
+// StringFlag sets up a flag that handles a string value.
 func (p *Plugin) StringFlag(name string, value string, usage string) error {
 	if p.flagSet.Parsed() {
 		return errors.New("flag must be unparsed")
@@ -58,16 +65,20 @@ func (p *Plugin) StringFlag(name string, value string, usage string) error {
 	return nil
 }
 
+// OptString returns the value of a given flag. A flag with that name must have
+// been defined by calling StringFlag.
 func (p Plugin) OptString(name string) (string, error) {
 
 	v, ok := p.flagVals[name]
 	if !ok {
-		return "", errors.Errorf("option not found: %s", name)
+		return "", fmt.Errorf("option not found: %s", name)
 	}
 
 	return *v.(*string), nil
 }
 
+// OptRequiredString is like OptString, but if the value of the flag is the zero
+// value due to the flag not being set, then an error is returned.
 func (p Plugin) OptRequiredString(name string) string {
 	val, err := p.OptString(name)
 	if err != nil {
@@ -81,6 +92,7 @@ func (p Plugin) OptRequiredString(name string) string {
 	return val
 }
 
+// ThresholdFlag sets up a flag that that handles a threshold value.
 func (p *Plugin) ThresholdFlag(name string, value string) error {
 	if p.flagSet.Parsed() {
 		return errors.New("flag must be unparsed")
@@ -92,10 +104,12 @@ func (p *Plugin) ThresholdFlag(name string, value string) error {
 	return nil
 }
 
+// OptThreshold returns the value of a given flag. A flag with that name must have
+// been defined by calling ThresholdFlag.
 func (p Plugin) OptThreshold(name string) (Threshold, error) {
 	v, ok := p.flagVals[name]
 	if !ok {
-		return Threshold{}, errors.Errorf("option not found: %s", name)
+		return Threshold{}, fmt.Errorf("option not found: %s", name)
 	}
 
 	t, err := NewThreshold(*v.(*string))

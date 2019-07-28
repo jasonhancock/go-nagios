@@ -7,9 +7,12 @@ import (
 	"github.com/pkg/errors"
 )
 
+// ErrorInvalidThresholdFormat is the error that is returned when a threshold
+// string cannot be parsed.
 var ErrorInvalidThresholdFormat error = errors.New("Invalid threshold format")
 
-// thresholds implement the format described here: https://nagios-plugins.org/doc/guidelines.html#THRESHOLDFORMAT
+// Threshold implements a Nagios threshold value following the format described
+// here: https://nagios-plugins.org/doc/guidelines.html#THRESHOLDFORMAT
 type Threshold struct {
 	min         float64
 	max         float64
@@ -19,6 +22,7 @@ type Threshold struct {
 	source      string
 }
 
+// NewThreshold parses a string into a Threshold value.
 func NewThreshold(str string) (*Threshold, error) {
 	t := &Threshold{
 		min:    0,
@@ -79,11 +83,12 @@ func NewThreshold(str string) (*Threshold, error) {
 	return t, nil
 }
 
+// String returns a string representation of the Threshold.
 func (t Threshold) String() string {
 	return t.source
 }
 
-// Evaluate returns true if the value matches the threshold, false otherwise
+// Evaluate returns true if the value matches the threshold, false otherwise.
 func (t Threshold) Evaluate(value float64) bool {
 	// Always return true if the source was empty
 	if t.source == "" {
@@ -110,7 +115,7 @@ func (t Threshold) Evaluate(value float64) bool {
 	return !inRange
 }
 
-// CheckThreshold returns a Nagios exit status code based on whether or not the value meets the warn and crit thresholds
+// CheckThreshold returns a Nagios exit status code based on whether or not the value meets the warn and crit thresholds.
 func CheckThreshold(value float64, warn *Threshold, crit *Threshold) int {
 	if crit.Evaluate(value) {
 		return CRITICAL

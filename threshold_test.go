@@ -3,12 +3,10 @@ package nagios
 import (
 	"testing"
 
-	"github.com/cheekybits/is"
+	"github.com/stretchr/testify/require"
 )
 
 func TestThreshold(t *testing.T) {
-	is := is.New(t)
-
 	var tests = []struct {
 		threshold   string
 		expectTrue  []float64
@@ -34,29 +32,27 @@ func TestThreshold(t *testing.T) {
 
 	for _, test := range tests {
 		thr, err := NewThreshold(test.threshold)
-		is.NoErr(err)
-		is.Equal(test.threshold, thr.String())
+		require.NoError(t, err)
+		require.Equal(t, test.threshold, thr.String())
 
 		for _, val := range test.expectTrue {
-			is.True(thr.Evaluate(val))
+			require.True(t, thr.Evaluate(val))
 		}
 
 		for _, val := range test.expectFalse {
-			is.False(thr.Evaluate(val))
+			require.False(t, thr.Evaluate(val))
 		}
 
 	}
 }
 
 func TestCheckThreshold(t *testing.T) {
-	is := is.New(t)
-
 	w, err := NewThreshold("80")
-	is.NoErr(err)
+	require.NoError(t, err)
 	c, err := NewThreshold("90")
-	is.NoErr(err)
+	require.NoError(t, err)
 
-	is.Equal(OK, CheckThreshold(70, w, c))
-	is.Equal(WARNING, CheckThreshold(85, w, c))
-	is.Equal(CRITICAL, CheckThreshold(95, w, c))
+	require.Equal(t, OK, CheckThreshold(70, w, c))
+	require.Equal(t, WARNING, CheckThreshold(85, w, c))
+	require.Equal(t, CRITICAL, CheckThreshold(95, w, c))
 }
