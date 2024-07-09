@@ -1,15 +1,15 @@
 package nagios
 
 import (
+	"errors"
+	"fmt"
 	"strconv"
 	"strings"
-
-	"github.com/pkg/errors"
 )
 
 // ErrorInvalidThresholdFormat is the error that is returned when a threshold
 // string cannot be parsed.
-var ErrorInvalidThresholdFormat error = errors.New("Invalid threshold format")
+var ErrorInvalidThresholdFormat error = errors.New("invalid threshold format")
 
 // Threshold implements a Nagios threshold value following the format described
 // here: https://nagios-plugins.org/doc/guidelines.html#THRESHOLDFORMAT
@@ -42,14 +42,14 @@ func NewThreshold(str string) (*Threshold, error) {
 	pieces := strings.Split(sansPrefix, ":")
 
 	if len(pieces) == 0 || len(pieces) > 2 {
-		return nil, errors.Wrap(ErrorInvalidThresholdFormat, "too many or few pieces")
+		return nil, fmt.Errorf("too many or few pieces: %w", ErrorInvalidThresholdFormat)
 	}
 
 	if len(pieces) == 1 {
 		// "10" means < 0 or > 10, (outside the range of {0 .. 10})
 		f, err := strconv.ParseFloat(pieces[0], 64)
 		if err != nil {
-			return nil, errors.Wrap(ErrorInvalidThresholdFormat, "unable to parse float value")
+			return nil, fmt.Errorf("unable to parse float value: %w", ErrorInvalidThresholdFormat)
 		}
 		t.max = f
 		t.min = 0
@@ -62,7 +62,7 @@ func NewThreshold(str string) (*Threshold, error) {
 		} else {
 			f, err := strconv.ParseFloat(pieces[0], 64)
 			if err != nil {
-				return nil, errors.Wrap(ErrorInvalidThresholdFormat, "unable to parse float value")
+				return nil, fmt.Errorf("unable to parse float value: %w", ErrorInvalidThresholdFormat)
 			}
 			t.min = f
 		}
@@ -74,7 +74,7 @@ func NewThreshold(str string) (*Threshold, error) {
 			// "10:20" means < 10 or > 20, (outside the range of {10 .. 20})
 			f, err := strconv.ParseFloat(pieces[1], 64)
 			if err != nil {
-				return nil, errors.Wrap(ErrorInvalidThresholdFormat, "unable to parse float value")
+				return nil, fmt.Errorf("unable to parse float value: %w", ErrorInvalidThresholdFormat)
 			}
 			t.max = f
 		}
